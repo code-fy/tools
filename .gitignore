@@ -1,0 +1,9 @@
+*__pycache__*
+*log
+train_data*
+sta_data*
+test
+.DS_Store
+.idea
+*.txt
+fm_models_tool/*.txt
