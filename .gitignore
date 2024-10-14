@@ -7,3 +7,5 @@ test
 .idea
 *.txt
 fm_models_tool/*.txt
+fm_models_tool/CL_*
+datas/*
