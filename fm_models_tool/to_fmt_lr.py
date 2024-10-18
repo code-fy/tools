@@ -1,10 +1,10 @@
 import sys
 import time
 
-ftrl_model_path = "/Users/apple/WorkSpace/tools/fm_models_tool/CL_IPR_ALLINONE.txt"
-online_model_path = "./CL_IPR_ALLINONE"
-model_name = "CL_IPR_ALLINONE"
-push_version = "20241017"
+ftrl_model_path = sys.argv[1]
+online_model_path = sys.argv[2]
+model_name = sys.argv[3]
+push_version = sys.argv[4]
 model_meta = {
     "intercept": 0,
     "auc": 0.9,
@@ -26,7 +26,6 @@ model_meta = {
     "seps": "\001\002\003",
     "pushVersion": f'{model_name}-{push_version}',
     "goalType": 'PAY',
-    "dims":'8',
     "discretizationVersion": '2',
 }
 
@@ -40,7 +39,6 @@ for ln in open(ftrl_model_path):
     fea = segs[0]
     fkey = []
     fvalue = []
-    fembeding = segs[3]
     for kv in fea.split('\001'):
         fsgs = kv.split('=')
         fk = fsgs[0]
@@ -54,11 +52,9 @@ for ln in open(ftrl_model_path):
     fkey = seps[2].join(fkey)
     fvalue = seps[2].join(fvalue)
     newlines.append(seps[0].join(
-        [f"{fkey}{seps[1]}{fvalue}", '0', '0', '0', f'{weight}{seps[0]}{fembeding}']) + '\n')
+        [f"{fkey}{seps[1]}{fvalue}", '0', '0', '0', f'{weight}']) + '\n')
 with open(online_model_path, 'w') as wf:
     model_meta['featureCount'] = len(newlines)
     meta_line = '\t'.join([f'{k}:{v}' for k, v in model_meta.items()])
     wf.write(meta_line + '\n')
     wf.writelines(newlines)
-
-# ./to_online_fmt.py /home/ubuntu/data/dsp-fm-modelpipeline/dsp-modelpipeline/data/dsp_models/20241016213001 ./CL_IPR_ALLINONE.txt CL_IPR_ALLINONE 20241017003001

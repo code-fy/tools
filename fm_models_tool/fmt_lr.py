@@ -29,36 +29,31 @@ model_meta = {
     "dims":'8',
     "discretizationVersion": '2',
 }
-
 newlines = []
-seps = model_meta['seps']
-for ln in open(ftrl_model_path):
-    segs = ln.strip().split('\002')
-    weight = segs[1]
-    if weight == '0.0':
-        continue
-    fea = segs[0]
-    fkey = []
-    fvalue = []
-    fembeding = segs[3]
-    for kv in fea.split('\001'):
-        fsgs = kv.split('=')
-        fk = fsgs[0]
-        fv = '='.join(fsgs[1:])
-        if fk == 'latitude' or fk == 'longitude':
-            fv = str(int(float(fv)))
-        if fk == 'size':
-            fk = 'creative_size'
-        fkey.append(fk)
-        fvalue.append(fv)
-    fkey = seps[2].join(fkey)
-    fvalue = seps[2].join(fvalue)
-    newlines.append(seps[0].join(
-        [f"{fkey}{seps[1]}{fvalue}", '0', '0', '0', f'{weight}{seps[0]}{fembeding}']) + '\n')
-with open(online_model_path, 'w') as wf:
-    model_meta['featureCount'] = len(newlines)
-    meta_line = '\t'.join([f'{k}:{v}' for k, v in model_meta.items()])
-    wf.write(meta_line + '\n')
-    wf.writelines(newlines)
+
+with open(ftrl_model_path) as f:
+    next(f)  # 跳过第一行
+    for ln in f:
+        segs = ln.strip().split('\001')
+        weight = float(segs[4])  # 将weight转为浮点数以便排序
+        # embeding = segs[5].replace("\003", ",")
+        fea = segs[0]
+
+        # 添加 (fea, weight, embeding) 到列表中
+        newlines.append((fea, weight))
+
+# 按weight的绝对值排序
+newlines.sort(key=lambda x: abs(x[1]), reverse=True)
+
+# 根据排序后的列表生成新的行
+sorted_lines = []
+for fea, weight in newlines:
+    sorted_lines.append(f'{fea}****{weight}\n')
+
+# 输出或写入文件
+with open('sorted_ftrl_model_CL_IPR_ALLINONE.txt', 'w') as out_file:
+    out_file.writelines(sorted_lines)
+
+
 
 # ./to_online_fmt.py /home/ubuntu/data/dsp-fm-modelpipeline/dsp-modelpipeline/data/dsp_models/20241016213001 ./CL_IPR_ALLINONE.txt CL_IPR_ALLINONE 20241017003001
